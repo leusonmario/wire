@@ -4,27 +4,30 @@ jdk:
   - oraclejdk7
   - oraclejdk8
 
-before_script:
-  - ./gen_tests.sh
-  - if [ ! -z "$(git status --porcelain)" ]; then echo "Test files changed. Did you run gen_tests.sh?"; exit 1; fi
-
-after_success:
-  - .buildscript/deploy_snapshot.sh
-
 env:
   global:
     - secure: "eNNY7wruuGZLSZLJQdNZOs/cAzMjrHRTUtYRR9XgwRVxUoXWzWjiqDn9ISTU7pGXogsja3qGP4POA6AaKWr4DR0ZO7o9hCO5YWPm5c0odUpGXZDNW2ffTrWDZfvU/L/ktxTEaV6IpyDScOw+O2Er2uyEsw7EuLCWOxkBHd797qM="
     - secure: "jJaloDUA4BUXmp7HKKOp8ATufaPxfMBxY8DaMiN1VaNo+VlbNPj30TUz9G0oWRhaByypjkqUxZcxpcwFsxKCdw/HF53YqFGEV9D2aF6337dRfx/5ZGNQ6wVPNncEyzfvAdliwEqKlGP+MkPnA4Hy2UjOWtWgtl+uJaM8/5najBE="
 
-branches:
-  except:
-    - gh-pages
-
 notifications:
   email: false
 
-sudo: false
+sudo: required
 
 cache:
   directories:
     - $HOME/.m2
+
+
+before_deploy:
+  - tar -zcvf coverage-result.tar.gz /home/travis/build/leusonmario/wire/target/site
+deploy:
+  provider: releases
+  api_key:
+    secure: "jy7Xhq0X2Mdg5s1EEgRLiTLRlm5lbj85PpiIYRUszmy4czIxKDuidbxCViTJ7DP9leXKWCVLWdjM96bMHItJmgcPdf4CleERZjv7iMMPwjbpG2yoNJCc5SolbWa2OMlrSgIF4HK5+oHNrT/5JzKh+/QZqY+We03cw3iuIgKw1zFOvQV6YwFpZzyH/SLMaDBIvE5eR+GStk0fMsfSg3X+Oft61bSkbesBHD6dx1LQTowKGzLNNqJhexIk7kOdegeXcSLUYXwSYgrHsdHkcQlUzJDrg+PY3/Xc5XkA8rA5awZjDjJuRHgfITwPZlFYAZyFjaefAaJLDxE5k0zzybn/GhoaiAQKsVmDt90QAdeGMsoIU6APVdrMcJZI8gm4pXb6Vo6/MvJls7A7QoLdpSJnndxIeAACKjBy9EvQx1HVtvevd5piaY1WvnKr/pw75see1igEzelH1G0uFENH0paRc2vRxFYpe2CPZkbQ903XyJulqjgEiGXFp95Mcc4hL91vChushjt5Uf77wNrVibcBzRSft5uHkWT5gYt1CsBHtFTUz0Voz/nqQpj9GykIa84ILVmUDq82KXKiVN/ltB7dWTa3NRfqrupo9fsqfxRF86KXVwUZQZUwiPpn2qMoR5tDpfrIyEGbrmSyeLUBskQgXeF6DzaD47OMhbhHcwmHT28="
+  file: coverage-result.tar.gz
+  file_glob: true
+  overwrite: true
+  skip_cleanup: true
+  on:
+    tags: true
