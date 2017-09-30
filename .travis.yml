@@ -20,7 +20,7 @@ cache:
 
 
 script:
-    - mvn clean -Dtest=SerializableTest#decodeGolden test jacoco:report coveralls:report
+    - mvn clean -Dtest=SerializableTest#decodeGolden test jacoco:report
 
 before_deploy:
   - tar -zcvf coverage-result.tar.gz /home/travis/build/leusonmario/wire/target/site
