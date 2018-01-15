@@ -1,30 +1,28 @@
+
+sudo: required
 language: java
 
 jdk:
   - oraclejdk7
   - oraclejdk8
 
-before_script:
-  - ./gen_tests.sh
-  - if [ ! -z "$(git status --porcelain)" ]; then echo "Test files changed. Did you run gen_tests.sh?"; exit 1; fi
 
-after_success:
-  - .buildscript/deploy_snapshot.sh
 
-env:
-  global:
-    - secure: "eNNY7wruuGZLSZLJQdNZOs/cAzMjrHRTUtYRR9XgwRVxUoXWzWjiqDn9ISTU7pGXogsja3qGP4POA6AaKWr4DR0ZO7o9hCO5YWPm5c0odUpGXZDNW2ffTrWDZfvU/L/ktxTEaV6IpyDScOw+O2Er2uyEsw7EuLCWOxkBHd797qM="
-    - secure: "jJaloDUA4BUXmp7HKKOp8ATufaPxfMBxY8DaMiN1VaNo+VlbNPj30TUz9G0oWRhaByypjkqUxZcxpcwFsxKCdw/HF53YqFGEV9D2aF6337dRfx/5ZGNQ6wVPNncEyzfvAdliwEqKlGP+MkPnA4Hy2UjOWtWgtl+uJaM8/5najBE="
+script:
+  - mvn clean cobertura:cobertura -Dtest=SerializableTest#decodeGolden -DfailIfNoTests=false
 
-branches:
-  except:
-    - gh-pages
+before_deploy:
+- tar -zcvf coverage-result.tar.gz /home/travis/build/leusonmario/wire/target/site/cobertura
 
-notifications:
-  email: false
+deploy:
+  provider: releases
+  api_key:
+    secure: "v6ImLbb5y2QHBaI3YlncdyGuUC2vlkNl2fUrze3HaQ4yUYgf8dK7mn8aQkbVK7+WJG90zBVnQXqa/VG2/oq1TAoOpwQfgPah/mY0uSZ2JMPsPZr1LamAEtGoJFeb+xnkoVMR93xjh+GKr5rxRApSjQmlrw1/eAPeQydK/L7FPPnVQCEOBXT5WmZR7c/nDJga8icPsr8O0obo3Wq0nobGiwGRNdkif4r0275k+Um35h4KMNLHF3qbKRRWvQS8Fl2rorB4efDLqrT+RvCYKPVAE+5mPF7Wbl+AiGRxYMhgPnW1+L7cUbeIwqGuo6Me/89AzrNSLyLcwXXOYTHX0aIrxJcW7fOebQowtpSoJbySVX+tByFEP2IaQgpzEIXbYM81pXmfjjvJjgEC6ZfM2P44pgeR7ORwDkRsgfndNAKU3jtVo/7fQXn2bprGdxSl2WZIOW7BgHY/naSaXWJCUMI4QzCWbXCDBnMxYLT9n1lFfPnB0/VXIckoyxWVQRRmvuKBEKPfiSRsfsfoP/792gArGgo9jMc0MHx+r56iYiAfPUnkiEHuNnmRfsws0sUta9oSRtEJvrSC51+gpZhWNB58ntNTPbFgyGBQWJRX8vC0Pokgo/waClm6lrEW/z6yO6oi9BM8MBVVdrXNbIM5yxrMKotp4wThK4gxnxqRGyCDfSA="
 
-sudo: false
 
-cache:
-  directories:
-    - $HOME/.m2
+  file: coverage-result.tar.gz
+  file_glob: true
+  overwrite: true
+  skip_cleanup: true
+  on:
+    tags: true
